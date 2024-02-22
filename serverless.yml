@@ -1,1 +1,67 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
 
+
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+frameworkVersion: '3'
+
+service: my-serverless-project
+
+provider:
+  logs: # Configura i log per le funzioni Lambda
+    restApi: true
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+  environment:
+    TABLE_NAME: Users
+
+functions:
+  createUser:
+    handler: handler.createUser
+    events:
+      - http:
+          path: create-user
+          method: post
+
+  getUserById:
+    handler: handler.getUserById
+    events:
+      - http:
+          path: user/{userId}    #user serve a rendere chiaro che ci si sta riferendo agli utenti
+          method: get
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: N
+          #- AttributeName: name
+           # AttributeType: S
+          #- AttributeName: email
+           # AttributeType: S
+        KeySchema:    #l'ID dell'utente è la chiave primaria del nostro db
+          - AttributeName: userId   
+            KeyType: HASH
+        ProvisionedThroughput:   # Definizione delle impostazioni di capacità di provisioning
+          ReadCapacityUnits: 5   # Numero di unità di lettura
+          WriteCapacityUnits: 5  # Numero di unità di scrittura    
